@@ -1,56 +1,57 @@
 # Reference
 
+## compile command
+
+```console
+scons-3 USE_HDF5=0 -j `nproc` ./build/ECE565-X86/gem5.opt
+```
+
 ## Build command
 
 ```console
-./build/ECE565-X86/gem5.opt configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=10000000 --l1d_size=64kB --l1i_size=64kB --caches --l2cache   --cacheline_size=64  -b gcc
+./build/ECE565-X86/gem5.opt --debug-flags=CacheAll --stats-file=compress.txt configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=10000000 --l1i_size=64kB --caches --l2cache --l2_size=4MB --cacheline_size 64 -b mcf
 ```
 
 ## Spec 2017 benchmarks
 
-- [ ] gcc
-- [ ] mcf
-- [ ] xz
-- [ ] deepsjeng
-- [ ] wrf
-- [x] cam4
-- [x] imagick
-- [x] nab
+- gcc
+- mcf
+- bzip2 (xz)
+- sjeng (deepsjeng)
+- wrf
+- milc (cam4)
+- zeusmp (imagick)
+- leslie3d (nab)
 
 ## System parameters
 
 L1:
 
-- l1d_size :  64KB
-– l1i_size :  64KB (default value is 32KB)
-- Associativity : 2 (same as default)
-- Need to check for LRU
-- Need to check 2 cycle access time
-- Line size : 64 byte
+- [x] l1d_size :  64KB
+– [x] l1i_size :  64KB (command line)
+- [x] assoc : 2
+- [x] replacement_policy : LRUP
+- [x] data_latency : 2
+- [x] entry_size : 64
 
 L2:
 
-- l2_size : set it to 4MB
-- Associativity : 2 (same as default)
-- Need to check for LRU
-- Need to check 2 cycle access time
-- Line size : 64 byte
-
-L3:
-
-- num-l3caches : set it to 0 (diabling l3 cache)
-- l3_size = 0MB (disabling l3)
+- [x] l2_size : 4MB (command line)
+- [x] Associativity : 8
+- [x] replacement_policy : LRUP
+- [x] response_latency : 20
+- [ ] Line size : 64 byte
 
 Memory:
 
-- mem-size = 4GB
-- 400 cycle access time and infinite bandwidth to set
-- How to setup DRAM access time
+- [ ] mem-size = 4GB
+- [ ] 400 cycle access time and infinite bandwidth to set
+- [ ] How to setup DRAM access time
 
 CPU:
 
-- O3CPU ( 5 stage out of order)
-- params.numROBEntries to set to 64 (In BaseO3.py , need to updated numROBEntries = Param.Unsigned(192, "Number of reorder buffer entries") to 64)
-- Need to check YAGS branch predictor
-- 64 entry indirect branch predictor
-- 64 entry RAS
+- [x] O3CPU :5 stage out of order (command line)
+- [X] params.numROBEntries : 64 (updated in BaseO3.py)
+- [ ] Branch predictor: TournamentBP
+- [ ] Indirect branch predictor : SimpleIndirectPredictor 2 WAY
+- [ ] RASSize : 16

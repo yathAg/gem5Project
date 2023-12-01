@@ -45,6 +45,8 @@
 
 #include "mem/cache/base.hh"
 
+#include <random>
+
 #include "base/compiler.hh"
 #include "base/logging.hh"
 #include "debug/Cache.hh"
@@ -76,7 +78,8 @@ BaseCache::CacheResponsePort::CacheResponsePort(const std::string &_name,
 {
 }
 
-BaseCache::BaseCache(const BaseCacheParams &p, unsigned blk_size)
+BaseCache::BaseCache(const f
+, unsigned blk_size)
     : ClockedObject(p),
       cpuSidePort (p.name + ".cpu_side_port", this, "CpuSidePort"),
       memSidePort(p.name + ".mem_side_port", this, "MemSidePort"),
@@ -976,6 +979,18 @@ bool
 BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
                                  PacketList &writebacks)
 {
+    // Seed for the random number generator
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+
+    // // Distribution to generate true or false randomly
+    // std::uniform_int_distribution<> dis(0, 1);
+
+    // // Randomly set predictor to true or false
+    // const bool predictor = dis(gen) == 1;
+
+    const bool predictor = false;
+
     // tempBlock does not exist in the tags, so don't do anything for it.
     if (blk == tempBlock) {
         return true;
@@ -985,10 +1000,17 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
     // metadata can be updated.
     Cycles compression_lat = Cycles(0);
     Cycles decompression_lat = Cycles(0);
-    const auto comp_data =
-        compressor->compress(data, compression_lat, decompression_lat);
-    std::size_t compression_size = comp_data->getSizeBits();
+    std::size_t compression_size;
 
+
+    if (predictor){
+        const auto comp_data =
+            compressor->compress(data, compression_lat, decompression_lat);
+            compression_size = comp_data->getSizeBits();
+    }
+    else{
+        compression_size = blkSize * CHAR_BIT;
+    }
     // Get previous compressed size
     CompressionBlk* compression_blk = static_cast<CompressionBlk*>(blk);
     [[maybe_unused]] const std::size_t prev_size =
@@ -1622,10 +1644,16 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
     // compressor is used, the compression/decompression methods are called to
     // calculate the amount of extra cycles needed to read or write compressed
     // blocks.
+
+    const bool predictor = false;
+
     if (compressor && pkt->hasData()) {
-        const auto comp_data = compressor->compress(
-            pkt->getConstPtr<uint64_t>(), compression_lat, decompression_lat);
-        blk_size_bits = comp_data->getSizeBits();
+        if (predictor){
+            const auto comp_data = compressor->compress(
+                pkt->getConstPtr<uint64_t>(), compression_lat,
+                decompression_lat);
+            blk_size_bits = comp_data->getSizeBits();
+        }
     }
 
     // Find replacement victim
