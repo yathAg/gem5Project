@@ -14,14 +14,16 @@ scons-3 USE_HDF5=0 -j `nproc` ./build/ECE565-X86/gem5.opt
 
 ## Spec 2017 benchmarks
 
-- gcc
-- mcf
-- bzip2 (xz)
-- sjeng (deepsjeng)
-- wrf
-- milc (cam4)
-- zeusmp (imagick)
-- leslie3d (nab)
+| Paper Benchmark | 2017 Benchmark |
+|------------------|----------------|
+| bzip             |  xz            |
+| gcc              |  gcc           |
+| mcf              |  mcf           |
+| twolf            |  deepseng      |
+| ammp             |  lbm           |
+| applu            |  wrf           |
+| equake           |  cam4          |
+| swim             |  imagick_s     |
 
 ## System parameters
 

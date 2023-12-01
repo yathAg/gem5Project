@@ -78,8 +78,7 @@ BaseCache::CacheResponsePort::CacheResponsePort(const std::string &_name,
 {
 }
 
-BaseCache::BaseCache(const f
-, unsigned blk_size)
+BaseCache::BaseCache(const BaseCacheParams &p, unsigned blk_size)
     : ClockedObject(p),
       cpuSidePort (p.name + ".cpu_side_port", this, "CpuSidePort"),
       memSidePort(p.name + ".mem_side_port", this, "MemSidePort"),
@@ -989,7 +988,7 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
     // // Randomly set predictor to true or false
     // const bool predictor = dis(gen) == 1;
 
-    const bool predictor = false;
+    const bool predictor = true;
 
     // tempBlock does not exist in the tags, so don't do anything for it.
     if (blk == tempBlock) {
@@ -1645,7 +1644,7 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
     // calculate the amount of extra cycles needed to read or write compressed
     // blocks.
 
-    const bool predictor = false;
+    const bool predictor = true;
 
     if (compressor && pkt->hasData()) {
         if (predictor){
