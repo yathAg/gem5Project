@@ -9,7 +9,8 @@ fi
 compression_type=$1
 
 # Array of benchmarks
-benchmarks=( "astar" )
+benchmarks=("xz_s" "gcc_s" "mcf_s" "deepsjeng_s" "lbm_s" "wrf_s" "cam4_s" "imagick_s")
+
 
 # Output file for storing miss rates
 miss_rate_file="miss_rates_${compression_type}.txt"
