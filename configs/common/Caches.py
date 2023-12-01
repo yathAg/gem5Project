@@ -53,6 +53,7 @@ class L1Cache(Cache):
     response_latency = 2
     mshrs = 4
     tgts_per_mshr = 20
+    clusivity = "mostly_excl"
 
 class L1_ICache(L1Cache):
     is_read_only = True
@@ -70,6 +71,13 @@ class L2Cache(Cache):
     mshrs = 20
     tgts_per_mshr = 12
     write_buffers = 8
+    clusivity = "mostly_excl"
+    #FPC TAGS
+    compressor = FPC()
+    compressor.size_threshold_percentage = 100
+    tags = CompressedTags()
+    tags.max_compression_ratio = 8
+    compressor.chunk_size_bits = 64
 
 class IOCache(Cache):
     assoc = 8
