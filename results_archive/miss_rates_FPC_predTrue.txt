@@ -1,0 +1,10 @@
+fotonik3d_s: system.l2.overallMissRate::total             0.164370                       # miss rate for overall accesses (Ratio)
+cactuBSSN_s: system.l2.overallMissRate::total             0.591289                       # miss rate for overall accesses (Ratio)
+imagick_s: system.l2.overallMissRate::total             0.807318                       # miss rate for overall accesses (Ratio)
+wrf_s: system.l2.overallMissRate::total             0.807512                       # miss rate for overall accesses (Ratio)
+xalancbmk_s: system.l2.overallMissRate::total             0.368110                       # miss rate for overall accesses (Ratio)
+x264_s: system.l2.overallMissRate::total             0.917309                       # miss rate for overall accesses (Ratio)
+exchange2_s: system.l2.overallMissRate::total             0.679368                       # miss rate for overall accesses (Ratio)
+gcc_s: 
+mcf_s: system.l2.overallMissRate::total             0.966096                       # miss rate for overall accesses (Ratio)
+astar: system.l2.overallMissRate::total             0.817810                       # miss rate for overall accesses (Ratio)

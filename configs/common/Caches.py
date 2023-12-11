@@ -73,11 +73,11 @@ class L2Cache(Cache):
     write_buffers = 8
     clusivity = "mostly_excl"
     #FPC TAGS
-    # compressor = FPC()
-    # compressor.size_threshold_percentage = 100
-    # tags = CompressedTags()
-    # tags.max_compression_ratio = 8
-    # compressor.chunk_size_bits = 64
+    compressor = FPC()
+    compressor.size_threshold_percentage = 100
+    tags = CompressedTags()
+    tags.max_compression_ratio = 8
+    compressor.chunk_size_bits = 64
 
 class IOCache(Cache):
     assoc = 8

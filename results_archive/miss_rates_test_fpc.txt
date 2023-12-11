@@ -1,0 +1,29 @@
+128kB 1 system.l2.overallMissRate::total             0.702978                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+128kB 2 system.l2.overallMissRate::total             0.607247                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+128kB 4 system.l2.overallMissRate::total             0.550791                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+128kB 8 system.l2.overallMissRate::total             0.537615                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+
+256kB 1 system.l2.overallMissRate::total             0.700761                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+256kB 2 system.l2.overallMissRate::total             0.601024                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+256kB 4 system.l2.overallMissRate::total             0.531958                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+256kB 8 system.l2.overallMissRate::total             0.513559                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+
+512kB 1 system.l2.overallMissRate::total             0.698985                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+512kB 2 system.l2.overallMissRate::total             0.598339                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+512kB 4 system.l2.overallMissRate::total             0.525061                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+512kB 8 system.l2.overallMissRate::total             0.497030                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+
+1MB 1 system.l2.overallMissRate::total             0.699056                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+1MB 2 system.l2.overallMissRate::total             0.593540                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+1MB 4 system.l2.overallMissRate::total             0.518231                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+1MB 8 system.l2.overallMissRate::total             0.490202                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+
+2MB 1 system.l2.overallMissRate::total             0.697141                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+2MB 2 system.l2.overallMissRate::total             0.594488                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+2MB 4 system.l2.overallMissRate::total             0.513583                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+2MB 8 system.l2.overallMissRate::total             0.488972                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+
+4MB 1 system.l2.overallMissRate::total             0.697141                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+4MB 2 system.l2.overallMissRate::total             0.591723                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+4MB 4 system.l2.overallMissRate::total             0.513070                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
+4MB 8 system.l2.overallMissRate::total             0.487039                       # miss rate for overall accesses (Ratio), xalancbmk_s: l1i_size=64kB
