@@ -9,8 +9,8 @@ fi
 compression_type=$1
 
 # Array of benchmarks
-benchmarks=("xz_s" "gcc_s" "mcf_s" "deepsjeng_s" "lbm_s" "wrf_s" "cam4_s" "imagick_s")
-
+benchmarks=("fotonik3d_s" "cactuBSSN_s" "imagick_s" "wrf_s" "xalancbmk_s" "x264_s" "exchange2_s" "gcc_s" "mcf_s" "astar")
+# You can uncomment one of the other benchmark lists based on your needs.
 
 # Output file for storing miss rates
 miss_rate_file="miss_rates_${compression_type}.txt"
@@ -24,11 +24,11 @@ do
     # Build the output filename
     output_file="${bench}_${compression_type}.txt"
     result_file="m5out/${bench}_${compression_type}.txt"
-    
+
     # Run the command with the current benchmark and compression type
     ./build/ECE565-X86/gem5.opt --debug-flags=CacheComp --stats-file="$output_file" \
     configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=10000000 \
-    --l1i_size=64kB --caches --l2cache --l2_size=256kB --cacheline_size 64 \
+    --l1i_size=64kB --caches --l2cache --l2_size=1MB --cacheline_size 128 \
     -b "$bench" > log_cache.txt
 
     echo "Finished running $bench with $compression_type, results saved in $output_file"
