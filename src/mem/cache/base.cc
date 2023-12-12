@@ -55,6 +55,7 @@
 #include "debug/CacheRepl.hh"
 #include "debug/CacheVerbose.hh"
 #include "debug/HWPrefetch.hh"
+#include "debug/kalabhya.hh"
 #include "mem/cache/compressors/base.hh"
 #include "mem/cache/mshr.hh"
 #include "mem/cache/prefetch/base.hh"
@@ -112,6 +113,7 @@ BaseCache::BaseCache(const BaseCacheParams &p, unsigned blk_size)
       missCount(p.max_miss_count),
       addrRanges(p.addr_ranges.begin(), p.addr_ranges.end()),
       system(p.system),
+      assoc(p.assoc), //added by kalabhya
       stats(*this)
 {
     // the MSHR queue has no reserve entries as we check the MSHR
@@ -128,10 +130,11 @@ BaseCache::BaseCache(const BaseCacheParams &p, unsigned blk_size)
     tags->tagsInit();
     if (prefetcher)
         prefetcher->setCache(this);
-
-    fatal_if(compressor && !dynamic_cast<CompressedTags*>(tags),
-        "The tags of compressed cache %s must derive from CompressedTags",
-        name());
+    //kalabhya, using normal tags with compressor data,
+    //hence removing this error
+    //fatal_if(compressor && !dynamic_cast<CompressedTags*>(tags),
+    //    "The tags of compressed cache %s must derive from CompressedTags",
+    //    name());
     warn_if(!compressor && dynamic_cast<CompressedTags*>(tags),
         "Compressed cache %s does not have a compression algorithm", name());
     if (compressor)
@@ -1328,6 +1331,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
     // Writeback handling is special case.  We can write the block into
     // the cache without having a writeable copy (or any copy at all).
     if (pkt->isWriteback()) {
+        DPRINTF(kalabhya, "inside Writeback");
         assert(blkSize == pkt->getSize());
 
         // we could get a clean writeback while we are having
@@ -1358,7 +1362,10 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             }
 
             blk->setCoherenceBits(CacheBlk::ReadableBit);
-        } else if (compressor) {
+        } //commented by kalabhya, do not need Update Compression here,
+           // not using update compression tags
+          else if (compressor) {
+            DPRINTF(kalabhya, "inside writeback compressor");
             // This is an overwrite to an existing block, therefore we need
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
@@ -1413,6 +1420,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         // go to next level.
         return false;
     } else if (pkt->cmd == MemCmd::WriteClean) {
+        DPRINTF(kalabhya, "inside WriteClean ");
         // WriteClean handling is a special case. We can allocate a
         // block directly if it doesn't exist and we can update the
         // block immediately. The WriteClean transfers the ownership
@@ -1437,7 +1445,9 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
 
                 blk->setCoherenceBits(CacheBlk::ReadableBit);
             }
-        } else if (compressor) {
+        } //updated by kalabhya, since we do not need updated compression
+          else if (compressor) {
+            DPRINTF(kalabhya, "inside Write Clean Compressor");
             // This is an overwrite to an existing block, therefore we need
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
@@ -1486,7 +1496,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             // When a block is compressed, it must first be decompressed
             // before being read. This adds to the access latency.
             if (compressor) {
-                lat += compressor->getDecompressionLatency(blk);
+                 lat += compressor->getDecompressionLatency(blk);
             }
         } else {
             lat = calculateTagOnlyLatency(pkt->headerDelay, tag_latency);
@@ -1645,24 +1655,42 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
     // blocks.
 
     const bool predictor = true;
-
-    if (compressor && pkt->hasData()) {
-        if (predictor){
+    //kalabhya, compressing through FPC,
+    // even if compression is not set by default in configs
+    //if (compressor && pkt->hasData()) {
+    if (compressor && pkt->hasData() && predictor) {
             const auto comp_data = compressor->compress(
                 pkt->getConstPtr<uint64_t>(), compression_lat,
                 decompression_lat);
             blk_size_bits = comp_data->getSizeBits();
         }
-    }
+
+
+     //kalabhya, getting the code for the victim
+     //size_t max_size = (assoc/2)*blkSize*8;
+     //size_t set_size;
+     //set_size = tags->getSetSize(pkt->getAddr());
+     //size_t free_size = max_size - set_size;
 
     // Find replacement victim
+    //std::vector<CacheBlk*> evict_blks;
+    //do{
+    //      CacheBlk *victim = tags->findVictim(addr, is_secure, blk_size_bits,
+    //                                    evict_blks);
+          // It is valid to return nullptr if there is no victim
+    //      if (!victim)
+    //         return nullptr;
+    //      if (victim->isValid())
+    //            free_size = free_size + victim->_size;
+    //  } while (free_size < blk_size_bits);
+    //kalabhya code ends
     std::vector<CacheBlk*> evict_blks;
     CacheBlk *victim = tags->findVictim(addr, is_secure, blk_size_bits,
                                         evict_blks);
 
-    // It is valid to return nullptr if there is no victim
     if (!victim)
-        return nullptr;
+             return nullptr;
+
 
     // Print victim block's information
     DPRINTF(CacheRepl, "Replacement victim: %s\n", victim->print());
@@ -1677,9 +1705,9 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
 
     // If using a compressor, set compression data. This must be done after
     // insertion, as the compression bit may be set.
-    if (compressor) {
-        compressor->setSizeBits(victim, blk_size_bits);
-        compressor->setDecompressionLatency(victim, decompression_lat);
+    if (compressor && predictor) {
+            compressor->setSizeBits(victim, blk_size_bits);
+            compressor->setDecompressionLatency(victim, decompression_lat);
     }
 
     return victim;
@@ -1757,8 +1785,9 @@ BaseCache::writebackBlk(CacheBlk *blk)
 
     // When a block is compressed, it must first be decompressed before being
     // sent for writeback.
+    // kalabhya, removin compression if, since compression would always be set
     if (compressor) {
-        pkt->payloadDelay = compressor->getDecompressionLatency(blk);
+           pkt->payloadDelay = compressor->getDecompressionLatency(blk);
     }
 
     return pkt;
@@ -1802,8 +1831,9 @@ BaseCache::writecleanBlk(CacheBlk *blk, Request::Flags dest, PacketId id)
 
     // When a block is compressed, it must first be decompressed before being
     // sent for writeback.
+    // kalabhya, removing if, since compression would always be set
     if (compressor) {
-        pkt->payloadDelay = compressor->getDecompressionLatency(blk);
+           pkt->payloadDelay = compressor->getDecompressionLatency(blk);
     }
 
     return pkt;

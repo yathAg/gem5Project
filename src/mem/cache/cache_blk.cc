@@ -43,6 +43,10 @@
 
 #include "base/cprintf.hh"
 
+//added by kalabhya
+#include <climits>
+#include <cmath>
+
 namespace gem5
 {
 
@@ -77,6 +81,65 @@ CacheBlkPrintWrapper::print(std::ostream &os, int verbosity,
              blk->isSet(CacheBlk::WritableBit) ? 'E' : '-',
              blk->isSet(CacheBlk::DirtyBit)    ? 'M' : '-',
              blk->isSecure()   ? 'S' : '-');
+}
+
+
+//kalabhya, implementing the compression factor
+uint8_t
+CacheBlk::calculateCompressionFactor(const std::size_t size) const
+{
+    // The number of blocks per sector determines the maximum comp factor.
+    // If the compressed size is worse than the uncompressed size, we assume
+    // the size is the uncompressed size, and thus the compression factor is 1
+    const std::size_t blk_size_bits = CHAR_BIT * blkSize;
+    const std::size_t compression_factor = (size > blk_size_bits) ? 1 :
+        ((size == 0) ? blk_size_bits :
+        alignToPowerOfTwo(std::floor(double(blk_size_bits) / size)));
+    //kalabhya, removed blks.size from original superblk implementation
+    return compression_factor;
+}
+
+
+//kalabhya, size and compression related function added in cacheblk,
+//similar to compression blk
+void
+CacheBlk::setSizeBits(const std::size_t size)
+{
+    _size = size;
+
+    //SuperBlk* superblock = static_cast<SuperBlk*>(getSectorBlock());
+    const uint8_t compression_factor =
+        calculateCompressionFactor(size);
+    _compressionFactor = compression_factor;
+
+    if (compression_factor != 1) {
+         _compressed = 1;
+    } else{
+         _compressed = 0;
+    }
+}
+
+//kalabhya, adding decompression latency same as superblks
+void
+CacheBlk::setDecompressionLatency(const Cycles lat)
+{
+    _decompressionLatency = lat;
+}
+
+
+//kalabhya, adding getDecompressionLatency same as superblk
+Cycles
+CacheBlk::getDecompressionLatency() const
+{
+    return _decompressionLatency;
+}
+
+
+void
+CacheBlk::setBlkSize(const std::size_t blk_size)
+{
+    assert(blkSize == 0);
+    blkSize = blk_size;
 }
 
 } // namespace gem5

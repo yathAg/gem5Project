@@ -984,6 +984,8 @@ class BaseCache : public ClockedObject
   public:
     /** System we are currently operating in. */
     System *system;
+    //kalabhya, adding associativity parameter
+    uint8_t assoc;
 
     struct CacheCmdStats : public statistics::Group
     {

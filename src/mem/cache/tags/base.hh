@@ -294,6 +294,9 @@ class BaseTags : public ClockedObject
      */
     virtual CacheBlk* accessBlock(const PacketPtr pkt, Cycles &lat) = 0;
 
+    //kalabhya, function to get the size of the blk
+    //virtual size_t getSetSize(Addr addr) = 0;
+
     /**
      * Generate the tag from the given address.
      *

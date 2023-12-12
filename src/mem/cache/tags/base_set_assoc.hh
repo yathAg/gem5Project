@@ -183,6 +183,23 @@ class BaseSetAssoc : public BaseTags
         return victim;
     }
 
+
+    //kalabhya, getting the size of a particular set containing compressed data
+    //size_t getSetSize(Addr add) override
+    //{
+        //setting a size variable
+     //   size_t size = 0;
+        //Get all the possible blocks
+     //    const std::vector<ReplaceableEntry*> entries =
+     //    indexingPolicy->getPossibleEntries(addr);
+     //    for (const auto& entry : entries){
+     //            CacheBlk* sub_blk = static_cast<CacheBlk*>(entry);
+     //            if (sub_blk->isValid()){
+     //                   size = size + sub_blk->_size;
+      //           }
+      //   }
+      //   return size;
+
     /**
      * Insert the new block into the cache and update replacement data.
      *

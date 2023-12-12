@@ -196,13 +196,14 @@ Base::compress(const uint64_t* data, Cycles& comp_lat, Cycles& decomp_lat)
 Cycles
 Base::getDecompressionLatency(const CacheBlk* blk)
 {
-    const CompressionBlk* comp_blk = static_cast<const CompressionBlk*>(blk);
-
+    //const CompressionBlk* comp_blk = static_cast<const CompressionBlk*>(blk);
     // If block is compressed, return its decompression latency
-    if (comp_blk && comp_blk->isCompressed()){
-        const Cycles decomp_lat = comp_blk->getDecompressionLatency();
+    // kalabhya, updated the if condition
+    //if (comp_blk && comp_blk->isCompressed()){
+    if (blk && blk->_compressed == 1){
+        const Cycles decomp_lat = blk->getDecompressionLatency();
         DPRINTF(CacheComp, "Decompressing block: %s (%d cycles)\n",
-                comp_blk->print(), decomp_lat);
+                blk->print(), decomp_lat);
         stats.decompressions += 1;
         return decomp_lat;
     }
@@ -218,7 +219,9 @@ Base::setDecompressionLatency(CacheBlk* blk, const Cycles lat)
     assert(blk != nullptr);
 
     // Assign latency
-    static_cast<CompressionBlk*>(blk)->setDecompressionLatency(lat);
+    // kalabhya, removed typecasting of Compression blk,
+    // implemented the same function in cacheBlk
+    blk->setDecompressionLatency(lat);
 }
 
 void
@@ -228,7 +231,8 @@ Base::setSizeBits(CacheBlk* blk, const std::size_t size_bits)
     assert(blk != nullptr);
 
     // Assign size
-    static_cast<CompressionBlk*>(blk)->setSizeBits(size_bits);
+    // kalabhya, removed typecasting of compression blk
+    blk->setSizeBits(size_bits);
 }
 
 Base::BaseStats::BaseStats(Base& _compressor)

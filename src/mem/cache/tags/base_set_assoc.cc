@@ -82,6 +82,9 @@ BaseSetAssoc::tagsInit()
 
         // Associate a replacement data entry to the block
         blk->replacementData = replacementPolicy->instantiateEntry();
+
+        //added by kalabhya
+        blk->setBlkSize(blkSize);
     }
 }
 
