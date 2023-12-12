@@ -1,0 +1,12 @@
+Global frequency set at 1000000000000 ticks per second
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 22.0.0.2
+gem5 compiled Dec  3 2023 03:04:22
+gem5 started Dec  3 2023 03:18:04
+gem5 executing on qstruct.ecn.purdue.edu, pid 8695
+command line: ./build/ECE565-X86/gem5.opt --debug-flags=CacheComp --stats-file=astar_noFPC_predTrue.txt configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=10000000 --l1i_size=64kB --caches --l2cache --l2_size=1MB --cacheline_size 128 -b astar
+
+**** REAL SIMULATION ****
+Exiting @ tick 5138088000 because a thread reached the max instruction count
