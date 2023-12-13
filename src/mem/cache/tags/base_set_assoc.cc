@@ -121,25 +121,34 @@ BaseSetAssoc::moveBlock(CacheBlk *src_blk, CacheBlk *dest_blk)
 CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
                         const bool is_secure,
                         const std::size_t size,
-                        std::vector<CacheBlk*>& evict_blks)
+                        std::vector<CacheBlk*>& evict_blks,
+                        bool update_expansion)
 {
     DPRINTF(kalabhya, "inside base assoc findVictim\n");
     // Get possible entries to be victimized
     const std::vector<ReplaceableEntry*> entries =
         indexingPolicy->getPossibleEntries(addr);
 
+    Addr tag = extractTag(addr);
     unsigned set_size = 0;
     CacheBlk* victim = nullptr;
+    CacheBlk* curr_blk = nullptr;
     std::vector<ReplaceableEntry*> valid_entries;
 
     for (const auto& entry : entries) {
         CacheBlk* entry_block = static_cast<CacheBlk*>(entry);
         DPRINTF(kalabhya, "static_cast to cacheblk first for loop\n");
         if (entry_block->isValid()) {
-            DPRINTF(kalabhya, "acessed isValid first for loop\n");
-            valid_entries.push_back(entry);
-            set_size += entry_block->_size;
-            DPRINTF(kalabhya, "accessed size first for loop\n");
+            if (entry_block->matchTag(tag, is_secure) && update_expansion) {
+                curr_blk = entry_block;
+                victim = curr_blk;
+            }
+            else {
+                DPRINTF(kalabhya, "acessed isValid first for loop\n");
+                valid_entries.push_back(entry);
+                set_size += entry_block->_size;
+                DPRINTF(kalabhya, "accessed size first for loop\n");
+            }
         }
         else {
             victim = entry_block;
@@ -183,6 +192,10 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
         evict_blks.push_back(victim);
     }
     DPRINTF(kalabhya, "exit\n");
+
+    if (update_expansion) {
+        return curr_blk;
+    }
     return victim;
 }
 

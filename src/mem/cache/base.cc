@@ -985,7 +985,97 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
     // Seed for the random number generator
     // std::random_device rd;
     // std::mt19937 gen(rd());
+    // // Distribution to generate true or false randomly
+    // std::uniform_int_distribution<> dis(0, 1);
 
+    // tempBlock does not exist in the tags, so don't do anything for it.
+    if (blk == tempBlock) {
+        return true;
+    }
+
+    // The compressor is called to compress the updated data, so that its
+    // metadata can be updated.
+    Cycles compression_lat = Cycles(0);
+    Cycles decompression_lat = Cycles(0);
+    std::size_t compression_size;
+
+
+    if (compressor && predictor){
+        const auto comp_data =
+            compressor->compress(data, compression_lat, decompression_lat);
+            compression_size = comp_data->getSizeBits();
+            if (compression_size < blkSize*CHAR_BIT){
+                decompression_lat = Cycles(5);
+            }
+    }
+    else{
+        compression_size = blkSize * CHAR_BIT;
+    }
+    // Get previous compressed size
+    [[maybe_unused]] const std::size_t prev_size =
+        blk->_size;
+
+    // If compressed size didn't change enough to modify its co-allocatability
+    // there is nothing to do. Otherwise we may be facing a data expansion
+    // (block passing from more compressed to less compressed state), or a
+    // data contraction (less to more).
+    bool is_data_expansion = false;
+    bool is_data_contraction = false;
+
+    if (prev_size < compression_size) {
+        //op_name = "expansion";
+        is_data_expansion = true;
+    } else if (prev_size > compression_size) {
+        //op_name = "contraction";
+        is_data_contraction = true;
+    }
+
+    // If block changed compression state, it was possibly co-allocated with
+    // other blocks and cannot be co-allocated anymore, so one or more blocks
+    // must be evicted to make room for the expanded/contracted block
+    std::vector<CacheBlk*> evict_blks;
+    if (is_data_expansion) {
+        std::vector<CacheBlk*> evict_blks;
+        CacheBlk *victim = nullptr;
+
+        victim = tags->findVictimVariableSegment(regenerateBlkAddr(blk),
+            blk->isSecure(), compression_size, evict_blks, true);
+
+        // It is valid to return nullptr if there is no victim
+        if (!victim) {
+            return false;
+        }
+
+        // Try to evict blocks; if it fails, give up on update
+        if (!handleEvictions(evict_blks, writebacks)) {
+            return false;
+        }
+
+       // DPRINTF(CacheComp, "Data %s: [%s] from %d to %d bits\n",
+       //         op_name, blk->print(), prev_size, compression_size);
+
+    }
+
+    // Update the number of data expansions/contractions
+    if (is_data_expansion) {
+        stats.dataExpansions++;
+    } else if (is_data_contraction) {
+        stats.dataContractions++;
+    }
+
+    blk->_size = compression_size;
+    blk->setDecompressionLatency(decompression_lat);
+
+    return true;
+}
+/*
+bool
+BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
+                                 PacketList &writebacks)
+{
+    // Seed for the random number generator
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
     // // Distribution to generate true or false randomly
     // std::uniform_int_distribution<> dis(0, 1);
 
@@ -1102,7 +1192,7 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
 
     return true;
 }
-
+*/
 void
 BaseCache::satisfyRequest(PacketPtr pkt, CacheBlk *blk, bool, bool)
 {
@@ -1405,6 +1495,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
             // If that is the case we might need to evict blocks.
+            DPRINTF(kalabhya,"Entering writeback updateCompressionData");
             if (!updateCompressionData(blk, pkt->getConstPtr<uint64_t>(),
                 writebacks)) {
                 invalidateBlock(blk);
@@ -1487,6 +1578,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
             // If that is the case we might need to evict blocks.
+            DPRINTF(kalabhya,"Entering writeclean updateCompressionData");
             if (!updateCompressionData(blk, pkt->getConstPtr<uint64_t>(),
                 writebacks)) {
                 invalidateBlock(blk);

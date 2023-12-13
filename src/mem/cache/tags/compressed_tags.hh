@@ -111,7 +111,8 @@ class CompressedTags : public SectorTags
 
     CacheBlk* findVictimVariableSegment(Addr addr, const bool is_secure,
                 const std::size_t size,
-                std::vector<CacheBlk*>& evict_blks) override
+                std::vector<CacheBlk*>& evict_blks,
+                bool update_expansion=false) override
     {
       return findVictim(addr,is_secure,size,evict_blks);
     }
