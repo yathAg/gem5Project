@@ -64,7 +64,7 @@ class L1_DCache(L1Cache):
     pass
 
 class L2Cache(Cache):
-    assoc = 30
+    assoc = 8
     tag_latency = 20
     data_latency = 40
     response_latency = 20
@@ -74,9 +74,9 @@ class L2Cache(Cache):
     clusivity = "mostly_excl"
     #FPC TAGS
     compressor = FPC()
-    compressor.size_threshold_percentage = 100
-    tags = CompressedTags()
-    tags.max_compression_ratio = 8
+    compressor.size_threshold_percentage = 50
+    tags = BaseSetAssoc()
+    #tags.max_compression_ratio = 8
     compressor.chunk_size_bits = 64
 
 class IOCache(Cache):

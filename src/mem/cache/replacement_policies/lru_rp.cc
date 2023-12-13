@@ -31,6 +31,8 @@
 #include <cassert>
 #include <memory>
 
+#include "base/trace.hh"
+#include "debug/vivek.hh"
 #include "params/LRURP.hh"
 #include "sim/cur_tick.hh"
 
@@ -74,16 +76,19 @@ ReplaceableEntry*
 LRU::getVictim(const ReplacementCandidates& candidates) const
 {
     // There must be at least one replacement candidate
+    DPRINTF(vivek, "enterd LRU findVictim\n");
     assert(candidates.size() > 0);
 
     // Visit all candidates to find victim
     ReplaceableEntry* victim = candidates[0];
     for (const auto& candidate : candidates) {
         // Update victim entry if necessary
+        DPRINTF(vivek, "enterd LRU findVictim for loop\n");
         if (std::static_pointer_cast<LRUReplData>(
                     candidate->replacementData)->lastTouchTick <
                 std::static_pointer_cast<LRUReplData>(
                     victim->replacementData)->lastTouchTick) {
+            DPRINTF(vivek, "LRU findVictim check\n");
             victim = candidate;
         }
     }

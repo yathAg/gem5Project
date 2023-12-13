@@ -217,9 +217,18 @@ class FALRU : public BaseTags
      * @param evict_blks Cache blocks to be evicted.
      * @return Cache block to be replaced.
      */
+
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
                          std::vector<CacheBlk*>& evict_blks) override;
+
+    CacheBlk* findVictimVariableSegment(Addr addr, const bool is_secure,
+                const std::size_t size,
+                std::vector<CacheBlk*>& evict_blks) override
+    {
+      return findVictim(addr,is_secure,size,evict_blks);
+    }
+
 
     /**
      * Insert the new block into the cache and update replacement data.

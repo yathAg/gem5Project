@@ -1331,7 +1331,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
     // Writeback handling is special case.  We can write the block into
     // the cache without having a writeable copy (or any copy at all).
     if (pkt->isWriteback()) {
-        DPRINTF(kalabhya, "inside Writeback");
+        //DPRINTF(kalabhya, "inside Writeback");
         assert(blkSize == pkt->getSize());
 
         // we could get a clean writeback while we are having
@@ -1365,7 +1365,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         } //commented by kalabhya, do not need Update Compression here,
            // not using update compression tags
           else if (compressor) {
-            DPRINTF(kalabhya, "inside writeback compressor");
+            //DPRINTF(kalabhya, "inside writeback compressor");
             // This is an overwrite to an existing block, therefore we need
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
@@ -1420,7 +1420,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         // go to next level.
         return false;
     } else if (pkt->cmd == MemCmd::WriteClean) {
-        DPRINTF(kalabhya, "inside WriteClean ");
+        //DPRINTF(kalabhya, "inside WriteClean ");
         // WriteClean handling is a special case. We can allocate a
         // block directly if it doesn't exist and we can update the
         // block immediately. The WriteClean transfers the ownership
@@ -1447,7 +1447,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             }
         } //updated by kalabhya, since we do not need updated compression
           else if (compressor) {
-            DPRINTF(kalabhya, "inside Write Clean Compressor");
+            //DPRINTF(kalabhya, "inside Write Clean Compressor");
             // This is an overwrite to an existing block, therefore we need
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
@@ -1685,12 +1685,19 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
     //  } while (free_size < blk_size_bits);
     //kalabhya code ends
     std::vector<CacheBlk*> evict_blks;
-    CacheBlk *victim = tags->findVictim(addr, is_secure, blk_size_bits,
+    CacheBlk *victim;
+    if (compressor) {
+        victim = tags->findVictimVariableSegment(addr, is_secure,
+                                        blk_size_bits,
                                         evict_blks);
+    }
+    else {
+        victim = tags->findVictim(addr, is_secure, blk_size_bits,
+                                        evict_blks);
+    }
 
     if (!victim)
              return nullptr;
-
 
     // Print victim block's information
     DPRINTF(CacheRepl, "Replacement victim: %s\n", victim->print());

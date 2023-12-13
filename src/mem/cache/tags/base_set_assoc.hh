@@ -165,10 +165,16 @@ class BaseSetAssoc : public BaseTags
      * @param evict_blks Cache blocks to be evicted.
      * @return Cache block to be replaced.
      */
+
+    CacheBlk* findVictimVariableSegment(Addr addr, const bool is_secure,
+                        const std::size_t size,
+                        std::vector<CacheBlk*>& evict_blks) override;
+
+
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
                          std::vector<CacheBlk*>& evict_blks) override
-    {
+   {
         // Get possible entries to be victimized
         const std::vector<ReplaceableEntry*> entries =
             indexingPolicy->getPossibleEntries(addr);
