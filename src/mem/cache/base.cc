@@ -1283,11 +1283,11 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
          }
 
     //Predictor implementation
-    if (hit && blk->_compressed && rank<=4)
+    if (hit && blk->_compressed && rank<=(assoc/2))
         global_predictor = global_predictor-5;
-    else if (hit && blk->_compressed && rank>4)
+    else if (hit && blk->_compressed && rank>(assoc/2))
         global_predictor = global_predictor+80;
-    else if (!(hit) && setSize<256)
+    else if (!(hit) && setSize<=((blkSize*(assoc/2)*CHAR_BIT) - CHAR_BIT))
         global_predictor = global_predictor+80;
 
     //DPRINTF(kalabhya2, "%d\n", global_predictor);
@@ -1697,6 +1697,9 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
                 pkt->getConstPtr<uint64_t>(), compression_lat,
                 decompression_lat);
             blk_size_bits = comp_data->getSizeBits();
+            if (blk_size_bits < blkSize*CHAR_BIT){
+                decompression_lat = Cycles(5);
+            }
         }
 
 
