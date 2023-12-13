@@ -301,7 +301,9 @@ class BaseSetAssoc : public BaseTags
            indexingPolicy->getPossibleEntries(addr);
        for (const auto& entry : all_entries) {
            CacheBlk* entry_blk = static_cast<CacheBlk*>(entry);
-           setSize = setSize + entry_blk->_size;
+           if (entry_blk->isValid()) {
+                setSize = setSize + entry_blk->_size;
+           }
        }
        return setSize;
    }

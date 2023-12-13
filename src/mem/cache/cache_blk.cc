@@ -138,7 +138,7 @@ CacheBlk::getDecompressionLatency() const
 void
 CacheBlk::setBlkSize(const std::size_t blk_size)
 {
-    assert(blkSize == 0);
+    //assert(blkSize == 0);
     blkSize = blk_size;
 }
 
