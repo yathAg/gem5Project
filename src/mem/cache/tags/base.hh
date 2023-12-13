@@ -357,6 +357,9 @@ class BaseTags : public ClockedObject
      */
     virtual bool anyBlk(std::function<bool(CacheBlk &)> visitor) = 0;
 
+    //kalabhya
+    virtual int getRank(Addr addr, CacheBlk *blk) = 0;
+    virtual size_t getSetSize(Addr addr) = 0;
   private:
     /**
      * Update the reference stats using data from the input block

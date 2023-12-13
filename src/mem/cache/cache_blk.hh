@@ -77,6 +77,7 @@ class CacheBlk : public TaggedEntry
     uint8_t _compressionFactor;
     int _compressed;
     Cycles _decompressionLatency;
+    Tick lastTouch;
 
 
     /**

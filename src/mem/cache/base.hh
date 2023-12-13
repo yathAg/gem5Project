@@ -105,6 +105,10 @@ class BaseCache : public ClockedObject
     };
 
   public:
+
+   //parameters for global predictor added by kalabhya
+   bool predictor = true;
+   int global_predictor = 0;
     /**
      * Reasons for caches to be blocked.
      */

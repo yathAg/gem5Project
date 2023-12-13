@@ -437,6 +437,18 @@ FALRU::CacheTracking::moveBlockToTail(FALRUBlk *blk)
     blk->inCachesMask = 0;
 }
 
+int
+FALRU::getRank(Addr addr, CacheBlk *blk)
+{
+     return 1;
+}
+
+size_t
+FALRU::getSetSize(Addr addr)
+{
+     return 0;
+}
+
 void
 FALRU::CacheTracking::recordAccess(FALRUBlk *blk)
 {

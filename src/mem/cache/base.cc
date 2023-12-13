@@ -56,6 +56,7 @@
 #include "debug/CacheVerbose.hh"
 #include "debug/HWPrefetch.hh"
 #include "debug/kalabhya.hh"
+#include "debug/kalabhya2.hh"
 #include "mem/cache/compressors/base.hh"
 #include "mem/cache/mshr.hh"
 #include "mem/cache/prefetch/base.hh"
@@ -988,11 +989,6 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
     // // Distribution to generate true or false randomly
     // std::uniform_int_distribution<> dis(0, 1);
 
-    // // Randomly set predictor to true or false
-    // const bool predictor = dis(gen) == 1;
-
-    const bool predictor = true;
-
     // tempBlock does not exist in the tags, so don't do anything for it.
     if (blk == tempBlock) {
         return true;
@@ -1005,7 +1001,7 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
     std::size_t compression_size;
 
 
-    if (predictor){
+    if (compressor && predictor){
         const auto comp_data =
             compressor->compress(data, compression_lat, decompression_lat);
             compression_size = comp_data->getSizeBits();
@@ -1263,6 +1259,45 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
     Cycles tag_latency(0);
     blk = tags->accessBlock(pkt, tag_latency);
 
+
+   //kalabhya code
+    //define a variable to find out if it is a hit or a miss
+    if (compressor){
+          int hit = 0;
+          int rank;
+          size_t setSize;
+          int i=0;
+         // int number_of_blocks_present;
+          if (blk != nullptr){
+               hit = 1;
+               rank = tags->getRank(pkt->getAddr(),blk);
+               blk->lastTouch = curTick();
+           }
+           else{
+               setSize = tags->getSetSize(pkt->getAddr());
+               //if (i<1000){
+               //       DPRINTF(kalabhya2, "miss %d\n", setSize);
+               //       i = i+1;
+               // }
+
+         }
+
+    //Predictor implementation
+    if (hit && blk->_compressed && rank<=4)
+        global_predictor = global_predictor-5;
+    else if (hit && blk->_compressed && rank>4)
+        global_predictor = global_predictor+80;
+    else if (!(hit) && setSize<256)
+        global_predictor = global_predictor+80;
+
+    //DPRINTF(kalabhya2, "%d\n", global_predictor);
+
+    if (global_predictor < 0)
+           predictor = false;
+    else
+           predictor = true;
+    //kalabhys_code_ends
+    }
     DPRINTF(Cache, "%s for %s %s\n", __func__, pkt->print(),
             blk ? "hit " + blk->print() : "miss");
 
@@ -1654,7 +1689,6 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
     // calculate the amount of extra cycles needed to read or write compressed
     // blocks.
 
-    const bool predictor = true;
     //kalabhya, compressing through FPC,
     // even if compression is not set by default in configs
     //if (compressor && pkt->hasData()) {

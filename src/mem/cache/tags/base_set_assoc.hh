@@ -147,6 +147,7 @@ class BaseSetAssoc : public BaseTags
 
             // Update replacement data of accessed block
             replacementPolicy->touch(blk->replacementData, pkt);
+            //blk->lastTouch = curTick();
         }
 
         // The tag lookup latency is the same for a hit or a miss
@@ -222,6 +223,7 @@ class BaseSetAssoc : public BaseTags
 
         // Update replacement policy
         replacementPolicy->reset(blk->replacementData, pkt);
+        blk->lastTouch = curTick();
     }
 
     void moveBlock(CacheBlk *src_blk, CacheBlk *dest_blk) override;
@@ -270,6 +272,40 @@ class BaseSetAssoc : public BaseTags
         }
         return false;
     }
+
+   //function by kalabhya to get the rank
+
+   int getRank(Addr addr, CacheBlk *blk)
+   {
+       int rank = 1;
+       Tick current_blk_tick =
+                blk->lastTouch;
+       const std::vector<ReplaceableEntry*> all_entries =
+           indexingPolicy->getPossibleEntries(addr);
+       for (const auto& entry : all_entries) {
+           CacheBlk* entry_blk = static_cast<CacheBlk*>(entry);
+           Tick blk_tick = entry_blk->lastTouch;
+           if (entry_blk->isValid() &&
+              (blk_tick > current_blk_tick)){
+                        rank = rank+1;
+           }
+       }
+       return rank;
+   } //getRank ends
+
+
+   size_t getSetSize(Addr addr)
+   {
+       size_t setSize = 0;
+       const std::vector<ReplaceableEntry*> all_entries =
+           indexingPolicy->getPossibleEntries(addr);
+       for (const auto& entry : all_entries) {
+           CacheBlk* entry_blk = static_cast<CacheBlk*>(entry);
+           setSize = setSize + entry_blk->_size;
+       }
+       return setSize;
+   }
+
 };
 
 } // namespace gem5

@@ -124,7 +124,9 @@ class SectorTags : public BaseTags
      * Initialize blocks as SectorBlk and SectorSubBlk instances.
      */
     void tagsInit() override;
-
+    //kalabhya
+    int getRank(Addr addr, CacheBlk *blk) override;
+    size_t getSetSize(Addr addr) override;
     /**
      * This function updates the tags when a block is invalidated but does
      * not invalidate the block itself. It also updates the replacement data.

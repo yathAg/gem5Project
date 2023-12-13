@@ -170,6 +170,9 @@ class FALRU : public BaseTags
      */
     void invalidate(CacheBlk *blk) override;
 
+
+    int getRank(Addr addr,CacheBlk *blk) override;
+    size_t getSetSize(Addr addr) override;
     /**
      * Access block and update replacement data.  May not succeed, in which
      * case nullptr pointer is returned.  This has all the implications of a

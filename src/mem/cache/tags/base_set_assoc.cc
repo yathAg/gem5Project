@@ -49,6 +49,7 @@
 
 #include "base/intmath.hh"
 #include "debug/kalabhya.hh"
+#include "sim/cur_tick.hh"
 
 namespace gem5
 {
@@ -99,6 +100,8 @@ BaseSetAssoc::invalidate(CacheBlk *blk)
 
     // Invalidate replacement data
     replacementPolicy->invalidate(blk->replacementData);
+    //kalabhya
+   blk->lastTouch = Tick(0);
 }
 
 void
@@ -110,7 +113,9 @@ BaseSetAssoc::moveBlock(CacheBlk *src_blk, CacheBlk *dest_blk)
     // we must touch the replacement data of the new entry, and invalidate
     // the one that is being moved.
     replacementPolicy->invalidate(src_blk->replacementData);
+    src_blk->lastTouch = Tick(0);
     replacementPolicy->reset(dest_blk->replacementData);
+    dest_blk->lastTouch = curTick();
 }
 
 CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
