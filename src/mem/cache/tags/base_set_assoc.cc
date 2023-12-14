@@ -124,7 +124,6 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
                         std::vector<CacheBlk*>& evict_blks,
                         bool update_expansion)
 {
-    DPRINTF(kalabhya, "inside base assoc findVictim\n");
     // Get possible entries to be victimized
     const std::vector<ReplaceableEntry*> entries =
         indexingPolicy->getPossibleEntries(addr);
@@ -140,6 +139,7 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
         DPRINTF(kalabhya, "static_cast to cacheblk first for loop\n");
         if (entry_block->isValid()) {
             if (entry_block->matchTag(tag, is_secure) && update_expansion) {
+                DPRINTF(kalabhya, "curr block\n");
                 curr_blk = entry_block;
                 victim = curr_blk;
             }
@@ -147,7 +147,6 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
                 DPRINTF(kalabhya, "acessed isValid first for loop\n");
                 valid_entries.push_back(entry);
                 set_size += entry_block->_size;
-                DPRINTF(kalabhya, "accessed size first for loop\n");
             }
         }
         else {
@@ -158,10 +157,10 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
     }
 
     unsigned max_set_size = (allocAssoc/2)*blkSize*CHAR_BIT;
-    DPRINTF(kalabhya, "max_set_size computed\n");
+    DPRINTF(kalabhya, "max_set_size computed = %d\n",max_set_size);
 
     int size_diff = size - (max_set_size - set_size);
-    DPRINTF(kalabhya, "first size_diff computed\n");
+    DPRINTF(kalabhya, "first size_diff computed = %d\n", size_diff);
 
     if (size_diff > 0 || !victim) {
         DPRINTF(kalabhya, "entering first LRU findVictim\n");
@@ -172,7 +171,7 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
     }
 
     size_diff -= victim->_size;
-    DPRINTF(kalabhya, "second size_diff computed\n");
+    DPRINTF(kalabhya, "second size_diff computed = %d\n", size_diff);
 
     if (size_diff > 0) {
         std::vector<ReplaceableEntry*> new_valid_entries;
@@ -180,8 +179,7 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
         for (const auto& entry : valid_entries) {
             CacheBlk* entry_block = static_cast<CacheBlk*>(entry);
             DPRINTF(kalabhya, "static_cast to cacheblk second for loop\n");
-            if (entry_block->_size >= size_diff) {
-                DPRINTF(kalabhya, "acessed size second for loop\n");
+            if (entry_block->_size >= size_diff && entry_block != victim) {
                 new_valid_entries.push_back(entry);
             }
         }
@@ -191,9 +189,11 @@ CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
         DPRINTF(kalabhya, "exited second LRU findVictim\n");
         evict_blks.push_back(victim);
     }
+    size_diff -= victim->_size;
+    assert(size_diff <=0);
     DPRINTF(kalabhya, "exit\n");
 
-    if (update_expansion) {
+    if (curr_blk) {
         return curr_blk;
     }
     return victim;

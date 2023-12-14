@@ -992,7 +992,7 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
     if (blk == tempBlock) {
         return true;
     }
-
+    DPRINTF(kalabhya,"Entered writeclean updateCompressionData\n");
     // The compressor is called to compress the updated data, so that its
     // metadata can be updated.
     Cycles compression_lat = Cycles(0);
@@ -1004,6 +1004,7 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
         const auto comp_data =
             compressor->compress(data, compression_lat, decompression_lat);
             compression_size = comp_data->getSizeBits();
+            compression_size = (compression_size + 63) & ~63;
             if (compression_size < blkSize*CHAR_BIT){
                 decompression_lat = Cycles(5);
             }
@@ -1029,25 +1030,27 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
         //op_name = "contraction";
         is_data_contraction = true;
     }
-
+    DPRINTF(kalabhya,"updateCompressionData expansion contraction checked \n");
+    CacheBlk *victim = blk;
     // If block changed compression state, it was possibly co-allocated with
     // other blocks and cannot be co-allocated anymore, so one or more blocks
     // must be evicted to make room for the expanded/contracted block
     std::vector<CacheBlk*> evict_blks;
     if (is_data_expansion) {
         std::vector<CacheBlk*> evict_blks;
-        CacheBlk *victim = nullptr;
 
         victim = tags->findVictimVariableSegment(regenerateBlkAddr(blk),
             blk->isSecure(), compression_size, evict_blks, true);
 
         // It is valid to return nullptr if there is no victim
         if (!victim) {
+            DPRINTF(kalabhya,"Exit updateCompressionData no victim\n");
             return false;
         }
 
         // Try to evict blocks; if it fails, give up on update
         if (!handleEvictions(evict_blks, writebacks)) {
+            DPRINTF(kalabhya,"Exit updateCompressionData failed eviction\n");
             return false;
         }
 
@@ -1063,11 +1066,12 @@ BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
         stats.dataContractions++;
     }
 
-    blk->_size = compression_size;
+    compressor->setSizeBits(blk, compression_size);
     blk->setDecompressionLatency(decompression_lat);
-
+    DPRINTF(kalabhya,"Exit updateCompressionData\n");
     return true;
 }
+
 /*
 bool
 BaseCache::updateCompressionData(CacheBlk *&blk, const uint64_t* data,
@@ -1495,7 +1499,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
             // If that is the case we might need to evict blocks.
-            DPRINTF(kalabhya,"Entering writeback updateCompressionData");
+            DPRINTF(kalabhya,"Entering writeback updateCompressionData\n");
             if (!updateCompressionData(blk, pkt->getConstPtr<uint64_t>(),
                 writebacks)) {
                 invalidateBlock(blk);
@@ -1578,7 +1582,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
             // to check for data expansion (i.e., block was compressed with
             // a smaller size, and now it doesn't fit the entry anymore).
             // If that is the case we might need to evict blocks.
-            DPRINTF(kalabhya,"Entering writeclean updateCompressionData");
+            DPRINTF(kalabhya,"Entering writeclean updateCompressionData\n");
             if (!updateCompressionData(blk, pkt->getConstPtr<uint64_t>(),
                 writebacks)) {
                 invalidateBlock(blk);
@@ -1789,6 +1793,7 @@ BaseCache::allocateBlock(const PacketPtr pkt, PacketList &writebacks)
                 pkt->getConstPtr<uint64_t>(), compression_lat,
                 decompression_lat);
             blk_size_bits = comp_data->getSizeBits();
+            blk_size_bits = (blk_size_bits + 63) & ~63;
             if (blk_size_bits < blkSize*CHAR_BIT){
                 decompression_lat = Cycles(5);
             }
