@@ -1381,7 +1381,7 @@ BaseCache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
         global_predictor = global_predictor-5;
     else if (hit && blk->_compressed && rank>(assoc/2))
         global_predictor = global_predictor+80;
-    else if (!(hit) && setSize<=((blkSize*(assoc/2)*CHAR_BIT) - CHAR_BIT))
+    else if (!(hit) && setSize<=((blkSize*(assoc/2)*CHAR_BIT) - 8*CHAR_BIT))
         global_predictor = global_predictor+80;
 
     //DPRINTF(kalabhya2, "%d\n", global_predictor);
