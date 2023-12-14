@@ -9,7 +9,7 @@ fi
 compression_type=$1
 
 # Array of benchmarks
-benchmarks=("xalancbmk_s")
+benchmarks=("fotonik3d_s" "cactuBSSN_s" "imagick_s" "wrf_s" "xalancbmk_s" "x264_s" "exchange2_s" "gcc_s" "mcf_s")
 
 # Output file for storing miss rates
 miss_rate_file="miss_rates_${compression_type}.txt"
@@ -21,13 +21,13 @@ rm -f "$miss_rate_file"
 for bench in "${benchmarks[@]}"
 do
     # Loop through l1i_size values
-    for l1i_size in "64kB"
+    for l1i_size in "64kB" 
     do
         # Loop through l2_size values
-        for l2_size in "128kB" "256kB" "512kB" "1MB" "2MB" "4MB"
+        for l2_size in  "512kB" #"128kB" "1MB" "2MB" "4MB" "256kB"
         do
             # Loop through l2_assoc values
-            for l2_assoc in 1 2 4 8
+            for l2_assoc in  8 
             do
                 # Build the output filename
                 output_file="${bench}_${compression_type}_${l1i_size}_${l2_size}_assoc${l2_assoc}.txt"
@@ -43,10 +43,13 @@ do
 
                 # Extract the line starting with "system.l2.overallMissRate::total" and save it
                 miss_rate=$(grep "system.l2.overallMissRate::total" "$result_file")
-                echo "$l2_size $l2_assoc $miss_rate, $bench: l1i_size=$l1i_size" >> "$miss_rate_file"
+                total_cycles=$(grep "system.cpu.numCycles" "$result_file")
+                echo "l2_size=$l2_size l2_assoc=$l2_assoc l1i_size=$l1i_size $miss_rate, $bench " >> "$miss_rate_file"
+                echo "l2_size=$l2_size l2_assoc=$l2_assoc l1i_size=$l1i_size $total_cycles, $bench " >> "$miss_rate_file"
             done
         done
     done
+    echo "" >> "$miss_rate_file"
 done
 
 echo "Miss rates saved in $miss_rate_file"

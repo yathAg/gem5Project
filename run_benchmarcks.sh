@@ -26,10 +26,10 @@ do
     result_file="m5out/${bench}_${compression_type}.txt"
 
     # Run the command with the current benchmark and compression type
-    ./build/ECE565-X86/gem5.opt --debug-flags=CacheComp --stats-file="$output_file" \
-    configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=10000000 \
+    ./build/ECE565-X86/gem5.opt --stats-file="$output_file" \
+    configs/spec/spec_se.py --cpu-type=O3CPU -F 10000000 --maxinsts=10000000 \
     --l1i_size=64kB --caches --l2cache --l2_size=1MB --cacheline_size 128 \
-    -b "$bench" > log_cache.txt
+    -b "$bench" 
 
     echo "Finished running $bench with $compression_type, results saved in $output_file"
 
