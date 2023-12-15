@@ -378,4 +378,16 @@ SectorTags::anyBlk(std::function<bool(CacheBlk &)> visitor)
     return false;
 }
 
+int
+SectorTags::getRank(Addr addr, CacheBlk *blk)
+{
+     return 1;
+}
+
+size_t
+SectorTags::getSetSize(Addr addr)
+{
+    return 0;
+}
+
 } // namespace gem5

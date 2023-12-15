@@ -282,6 +282,12 @@ class BaseTags : public ClockedObject
                                  const std::size_t size,
                                  std::vector<CacheBlk*>& evict_blks) = 0;
 
+    virtual CacheBlk* findVictimVariableSegment(Addr addr,
+                                const bool is_secure,
+                                const std::size_t size,
+                                std::vector<CacheBlk*>& evict_blks,
+                                bool update_expansion=false) = 0;
+
     /**
      * Access block and update replacement data. May not succeed, in which case
      * nullptr is returned. This has all the implications of a cache access and
@@ -293,6 +299,9 @@ class BaseTags : public ClockedObject
      * @return Pointer to the cache block if found.
      */
     virtual CacheBlk* accessBlock(const PacketPtr pkt, Cycles &lat) = 0;
+
+    //kalabhya, function to get the size of the blk
+    //virtual size_t getSetSize(Addr addr) = 0;
 
     /**
      * Generate the tag from the given address.
@@ -349,6 +358,9 @@ class BaseTags : public ClockedObject
      */
     virtual bool anyBlk(std::function<bool(CacheBlk &)> visitor) = 0;
 
+    //kalabhya
+    virtual int getRank(Addr addr, CacheBlk *blk) = 0;
+    virtual size_t getSetSize(Addr addr) = 0;
   private:
     /**
      * Update the reference stats using data from the input block

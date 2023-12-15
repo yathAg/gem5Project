@@ -124,7 +124,9 @@ class SectorTags : public BaseTags
      * Initialize blocks as SectorBlk and SectorSubBlk instances.
      */
     void tagsInit() override;
-
+    //kalabhya
+    int getRank(Addr addr, CacheBlk *blk) override;
+    size_t getSetSize(Addr addr) override;
     /**
      * This function updates the tags when a block is invalidated but does
      * not invalidate the block itself. It also updates the replacement data.
@@ -174,9 +176,18 @@ class SectorTags : public BaseTags
      * @param evict_blks Cache blocks to be evicted.
      * @return Cache block to be replaced.
      */
+
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
                          std::vector<CacheBlk*>& evict_blks) override;
+
+    CacheBlk* findVictimVariableSegment(Addr addr, const bool is_secure,
+                const std::size_t size,
+                std::vector<CacheBlk*>& evict_blks,
+                bool update_expansion=false) override
+    {
+      return findVictim(addr,is_secure,size,evict_blks);
+    }
 
     /**
      * Calculate a block's offset in a sector from the address.

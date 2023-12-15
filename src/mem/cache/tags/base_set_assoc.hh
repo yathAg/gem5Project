@@ -147,6 +147,7 @@ class BaseSetAssoc : public BaseTags
 
             // Update replacement data of accessed block
             replacementPolicy->touch(blk->replacementData, pkt);
+            //blk->lastTouch = curTick();
         }
 
         // The tag lookup latency is the same for a hit or a miss
@@ -165,10 +166,17 @@ class BaseSetAssoc : public BaseTags
      * @param evict_blks Cache blocks to be evicted.
      * @return Cache block to be replaced.
      */
+
+    CacheBlk* findVictimVariableSegment(Addr addr, const bool is_secure,
+                        const std::size_t size,
+                        std::vector<CacheBlk*>& evict_blks,
+                        bool update_expansion=false) override;
+
+
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
                          std::vector<CacheBlk*>& evict_blks) override
-    {
+   {
         // Get possible entries to be victimized
         const std::vector<ReplaceableEntry*> entries =
             indexingPolicy->getPossibleEntries(addr);
@@ -182,6 +190,23 @@ class BaseSetAssoc : public BaseTags
 
         return victim;
     }
+
+
+    //kalabhya, getting the size of a particular set containing compressed data
+    //size_t getSetSize(Addr add) override
+    //{
+        //setting a size variable
+     //   size_t size = 0;
+        //Get all the possible blocks
+     //    const std::vector<ReplaceableEntry*> entries =
+     //    indexingPolicy->getPossibleEntries(addr);
+     //    for (const auto& entry : entries){
+     //            CacheBlk* sub_blk = static_cast<CacheBlk*>(entry);
+     //            if (sub_blk->isValid()){
+     //                   size = size + sub_blk->_size;
+      //           }
+      //   }
+      //   return size;
 
     /**
      * Insert the new block into the cache and update replacement data.
@@ -199,6 +224,7 @@ class BaseSetAssoc : public BaseTags
 
         // Update replacement policy
         replacementPolicy->reset(blk->replacementData, pkt);
+        blk->lastTouch = curTick();
     }
 
     void moveBlock(CacheBlk *src_blk, CacheBlk *dest_blk) override;
@@ -247,6 +273,42 @@ class BaseSetAssoc : public BaseTags
         }
         return false;
     }
+
+   //function by kalabhya to get the rank
+
+   int getRank(Addr addr, CacheBlk *blk)
+   {
+       int rank = 1;
+       Tick current_blk_tick =
+                blk->lastTouch;
+       const std::vector<ReplaceableEntry*> all_entries =
+           indexingPolicy->getPossibleEntries(addr);
+       for (const auto& entry : all_entries) {
+           CacheBlk* entry_blk = static_cast<CacheBlk*>(entry);
+           Tick blk_tick = entry_blk->lastTouch;
+           if (entry_blk->isValid() &&
+              (blk_tick > current_blk_tick)){
+                        rank = rank+1;
+           }
+       }
+       return rank;
+   } //getRank ends
+
+
+   size_t getSetSize(Addr addr)
+   {
+       size_t setSize = 0;
+       const std::vector<ReplaceableEntry*> all_entries =
+           indexingPolicy->getPossibleEntries(addr);
+       for (const auto& entry : all_entries) {
+           CacheBlk* entry_blk = static_cast<CacheBlk*>(entry);
+           if (entry_blk->isValid()) {
+                setSize = setSize + entry_blk->_size;
+           }
+       }
+       return setSize;
+   }
+
 };
 
 } // namespace gem5

@@ -170,6 +170,9 @@ class FALRU : public BaseTags
      */
     void invalidate(CacheBlk *blk) override;
 
+
+    int getRank(Addr addr,CacheBlk *blk) override;
+    size_t getSetSize(Addr addr) override;
     /**
      * Access block and update replacement data.  May not succeed, in which
      * case nullptr pointer is returned.  This has all the implications of a
@@ -217,9 +220,19 @@ class FALRU : public BaseTags
      * @param evict_blks Cache blocks to be evicted.
      * @return Cache block to be replaced.
      */
+
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
                          std::vector<CacheBlk*>& evict_blks) override;
+
+    CacheBlk* findVictimVariableSegment(Addr addr, const bool is_secure,
+                const std::size_t size,
+                std::vector<CacheBlk*>& evict_blks,
+                bool update_expansion=false) override
+    {
+      return findVictim(addr,is_secure,size,evict_blks);
+    }
+
 
     /**
      * Insert the new block into the cache and update replacement data.

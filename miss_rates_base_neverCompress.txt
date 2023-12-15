@@ -1,0 +1,27 @@
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.423240                       # miss rate for overall accesses (Ratio), fotonik3d_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                          7719089                       # Number of cpu cycles simulated (Cycle), fotonik3d_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.671480                       # miss rate for overall accesses (Ratio), cactuBSSN_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                         10731209                       # Number of cpu cycles simulated (Cycle), cactuBSSN_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.866855                       # miss rate for overall accesses (Ratio), imagick_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                          6724886                       # Number of cpu cycles simulated (Cycle), imagick_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.866454                       # miss rate for overall accesses (Ratio), wrf_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                          1812450                       # Number of cpu cycles simulated (Cycle), wrf_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.523709                       # miss rate for overall accesses (Ratio), xalancbmk_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                         12970119                       # Number of cpu cycles simulated (Cycle), xalancbmk_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.943100                       # miss rate for overall accesses (Ratio), x264_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                           681328                       # Number of cpu cycles simulated (Cycle), x264_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.697171                       # miss rate for overall accesses (Ratio), exchange2_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                          7045165                       # Number of cpu cycles simulated (Cycle), exchange2_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.643561                       # miss rate for overall accesses (Ratio), gcc_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                         13720684                       # Number of cpu cycles simulated (Cycle), gcc_s 
+
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.l2.overallMissRate::total             0.988755                       # miss rate for overall accesses (Ratio), mcf_s 
+l2_size=256kB l2_assoc=4 l1i_size=64kB system.cpu.numCycles                         11033942                       # Number of cpu cycles simulated (Cycle), mcf_s 
+

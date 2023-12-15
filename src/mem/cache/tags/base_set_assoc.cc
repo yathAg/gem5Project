@@ -48,6 +48,8 @@
 #include <string>
 
 #include "base/intmath.hh"
+#include "debug/kalabhya.hh"
+#include "sim/cur_tick.hh"
 
 namespace gem5
 {
@@ -82,6 +84,9 @@ BaseSetAssoc::tagsInit()
 
         // Associate a replacement data entry to the block
         blk->replacementData = replacementPolicy->instantiateEntry();
+
+        //added by kalabhya
+        blk->setBlkSize(blkSize);
     }
 }
 
@@ -95,6 +100,8 @@ BaseSetAssoc::invalidate(CacheBlk *blk)
 
     // Invalidate replacement data
     replacementPolicy->invalidate(blk->replacementData);
+    //kalabhya
+   blk->lastTouch = Tick(0);
 }
 
 void
@@ -106,7 +113,90 @@ BaseSetAssoc::moveBlock(CacheBlk *src_blk, CacheBlk *dest_blk)
     // we must touch the replacement data of the new entry, and invalidate
     // the one that is being moved.
     replacementPolicy->invalidate(src_blk->replacementData);
+    src_blk->lastTouch = Tick(0);
     replacementPolicy->reset(dest_blk->replacementData);
+    dest_blk->lastTouch = curTick();
+}
+
+CacheBlk* BaseSetAssoc::findVictimVariableSegment(Addr addr,
+                        const bool is_secure,
+                        const std::size_t size,
+                        std::vector<CacheBlk*>& evict_blks,
+                        bool update_expansion)
+{
+    // Get possible entries to be victimized
+    const std::vector<ReplaceableEntry*> entries =
+        indexingPolicy->getPossibleEntries(addr);
+
+    Addr tag = extractTag(addr);
+    unsigned set_size = 0;
+    CacheBlk* victim = nullptr;
+    CacheBlk* curr_blk = nullptr;
+    std::vector<ReplaceableEntry*> valid_entries;
+
+    for (const auto& entry : entries) {
+        CacheBlk* entry_block = static_cast<CacheBlk*>(entry);
+        DPRINTF(kalabhya, "static_cast to cacheblk first for loop\n");
+        if (entry_block->isValid()) {
+            if (entry_block->matchTag(tag, is_secure) && update_expansion) {
+                DPRINTF(kalabhya, "curr block\n");
+                curr_blk = entry_block;
+                victim = curr_blk;
+            }
+            else {
+                DPRINTF(kalabhya, "acessed isValid first for loop\n");
+                valid_entries.push_back(entry);
+                set_size += entry_block->_size;
+            }
+        }
+        else {
+            victim = entry_block;
+            evict_blks.push_back(victim);
+        }
+
+    }
+
+    unsigned max_set_size = (allocAssoc/2)*blkSize*CHAR_BIT;
+    DPRINTF(kalabhya, "max_set_size computed = %d\n",max_set_size);
+
+    int size_diff = size - (max_set_size - set_size);
+    DPRINTF(kalabhya, "first size_diff computed = %d\n", size_diff);
+
+    if (size_diff > 0 || !victim) {
+        DPRINTF(kalabhya, "entering first LRU findVictim\n");
+        victim = static_cast<CacheBlk*>(
+            replacementPolicy->getVictim(valid_entries));
+        DPRINTF(kalabhya, "exited first LRU findVictim\n");
+        evict_blks.push_back(victim);
+    }
+
+    size_diff -= victim->_size;
+    DPRINTF(kalabhya, "second size_diff computed = %d\n", size_diff);
+
+    if (size_diff > 0) {
+        std::vector<ReplaceableEntry*> new_valid_entries;
+        DPRINTF(kalabhya, "second size_diff check\n");
+        for (const auto& entry : valid_entries) {
+            CacheBlk* entry_block = static_cast<CacheBlk*>(entry);
+            DPRINTF(kalabhya, "static_cast to cacheblk second for loop\n");
+            if (entry_block->_size >= size_diff && entry_block != victim) {
+                new_valid_entries.push_back(entry);
+            }
+        }
+
+        victim = static_cast<CacheBlk*>(
+            replacementPolicy->getVictim(new_valid_entries));
+        DPRINTF(kalabhya, "exited second LRU findVictim\n");
+        evict_blks.push_back(victim);
+    }
+    size_diff -= victim->_size;
+    assert(size_diff <=0);
+    DPRINTF(kalabhya, "exit\n");
+
+    if (curr_blk) {
+        return curr_blk;
+    }
+    return victim;
 }
 
 } // namespace gem5

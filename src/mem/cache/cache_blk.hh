@@ -70,6 +70,16 @@ namespace gem5
 class CacheBlk : public TaggedEntry
 {
   public:
+
+    //kalabhya, adding size bit, stores the size of compression data
+    std::size_t _size = 0;
+    //kalabhya, adding some variable to aid compression
+    uint8_t _compressionFactor;
+    int _compressed;
+    Cycles _decompressionLatency;
+    Tick lastTouch;
+
+
     /**
      * Cache block's enum listing the supported coherence bits. The valid
      * bit is not defined here because it is part of a TaggedEntry.
@@ -160,6 +170,17 @@ class CacheBlk : public TaggedEntry
     CacheBlk(const CacheBlk&) = delete;
     CacheBlk& operator=(const CacheBlk&) = delete;
     CacheBlk(const CacheBlk&&) = delete;
+
+    //added by kalabhya
+    std::size_t blkSize;
+    void setBlkSize(const std::size_t blk_size);
+    uint8_t calculateCompressionFactor(const std::size_t size) const;
+    void setSizeBits(const std::size_t size);
+    void setDecompressionLatency(const Cycles lat);
+    Cycles getDecompressionLatency() const;
+
+
+
     /**
      * Move assignment operator.
      * This should only be used to move an existing valid entry into an

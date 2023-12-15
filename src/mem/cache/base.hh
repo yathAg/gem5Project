@@ -105,6 +105,10 @@ class BaseCache : public ClockedObject
     };
 
   public:
+
+   //parameters for global predictor added by kalabhya
+   bool predictor = true;
+   int global_predictor = -8000000;
     /**
      * Reasons for caches to be blocked.
      */
@@ -984,6 +988,8 @@ class BaseCache : public ClockedObject
   public:
     /** System we are currently operating in. */
     System *system;
+    //kalabhya, adding associativity parameter
+    uint8_t assoc;
 
     struct CacheCmdStats : public statistics::Group
     {
