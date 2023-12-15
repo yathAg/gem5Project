@@ -35,7 +35,7 @@ do
 
                 # Run the command with the current benchmark and parameters
                 ./build/ECE565-X86/gem5.opt --stats-file="$output_file" \
-                configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=10000000 \
+                configs/spec/spec_se.py --cpu-type=O3CPU --maxinsts=100000000 \
                 --l1i_size="$l1i_size" --caches --l2cache --l2_size="$l2_size" --l2_assoc="$l2_assoc" --cacheline_size 64 \
                 -b "$bench"
 
